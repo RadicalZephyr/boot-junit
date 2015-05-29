@@ -4,7 +4,8 @@
   (:import org.junit.runner.JUnitCore
            (org.reflections Reflections
                             Configuration)
-           (org.reflections.scanners TypeAnnotationsScanner
+           (org.reflections.scanners Scanner
+                                     TypeAnnotationsScanner
                                      MethodAnnotationsScanner)
            (org.reflections.util ClasspathHelper
                                  ConfigurationBuilder
@@ -28,8 +29,8 @@
         ^Configuration config
         (.. (ConfigurationBuilder.)
             (setUrls (ClasspathHelper/forPackage package (into-array ClassLoader [])))
-            (setScanners (TypeAnnotationsScanner.)
-                         (MethodAnnotationsScanner.))
+            (setScanners (into-array Scanner [(TypeAnnotationsScanner.)
+                                              (MethodAnnotationsScanner.)]))
             (filterInputsBy (.. (FilterBuilder.)
                                 (includePackage package))))
         reflections (Reflections. config)
