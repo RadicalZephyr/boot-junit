@@ -5,7 +5,7 @@
 
 (deftask junit
   "Run the jUnit test runner."
-  []
+  [p packages PACKAGE #{sym} "The set of Java packages to run tests in."]
   (with-pre-wrap fileset
     (let [result (JUnitCore/runClasses
                   (into-array [#_ (magic goes here to find all test classes)]))]
