@@ -6,10 +6,10 @@
 (defn destructure-results [result]
   {})
 
-(deftask junit
+(core/deftask junit
   "Run the jUnit test runner."
   [p packages PACKAGE #{sym} "The set of Java packages to run tests in."]
-  (with-pre-wrap fileset
+  (core/with-pre-wrap fileset
     (let [result (JUnitCore/runClasses
                   (into-array Class
                               [#_ (magic goes here to find all test classes)]))]
