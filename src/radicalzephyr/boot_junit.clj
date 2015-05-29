@@ -16,6 +16,9 @@
    :failed  (.getFailureCount result)
    :failures (map failure->map (.getFailures result))})
 
+(defn find-all-tests [packages]
+  [])
+
 (core/deftask junit
   "Run the jUnit test runner."
   [p packages PACKAGE #{sym} "The set of Java packages to run tests in."]
@@ -23,7 +26,7 @@
     (if (seq packages)
       (let [result (JUnitCore/runClasses
                     (into-array Class
-                                [#_ (magic goes here to find all test classes)]))]
+                                (find-all-tests packages)))]
         (when (> (.getFailureCount result) 0)
           (throw (ex-info "There were some test failures."
                           (result->map result)))))
