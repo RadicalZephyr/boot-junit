@@ -2,7 +2,13 @@
   {:boot/export-tasks true}
   (:require [boot.core :as core])
   (:import org.junit.runner.JUnitCore
-           org.reflections.Reflections))
+           (org.reflections Reflections
+                            Configuration)
+           (org.reflections.scanners TypeAnnotationsScanner
+                                     MethodAnnotationsScanner)
+           (org.reflections.util ClasspathHelper
+                                 ConfigurationBuilder
+                                 FilterBuilder)))
 
 (defn failure->map [failure]
   {:description (.. failure (getDescription) (toString))
@@ -18,7 +24,15 @@
    :failures (map failure->map (.getFailures result))})
 
 (defn find-all-tests [packages]
-  (let [reflections (Reflections. (first packages))
+  (let [^String package (str (first packages))
+        ^Configuration config
+        (.. (ConfigurationBuilder.)
+            (setUrls (ClasspathHelper/forPackage package))
+            (setScanners (TypeAnnotationsScanner.)
+                         (MethodAnnotationsScanner.))
+            (filterInputsBy (.. (FilterBuilder.)
+                                (includePackage package))))
+        reflections (Reflections. config)
         test-methods (.getMethodsAnnotatedWith reflections
                                                org.junit.Test)]
     (->> test-methods
