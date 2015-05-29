@@ -3,12 +3,18 @@
   (:require [boot.core :as core])
   (:import org.junit.runner.JUnitCore))
 
-(defn destructure-results [result]
+(defn failure->map [failure]
+  {:description (.. failure (getDescription) (toString))
+   :exception (.getException failure)
+   :message (.getMessage failure)})
+
+(defn result->map [result]
   {:successful? (.wasSuccessful result)
    :run-time (.getRunTime result)
    :run     (.getRunCount result)
    :ignored (.getIgnoredCount result)
-   :failed  (.getFailureCount result)})
+   :failed  (.getFailureCount result)
+   :failures (map failure->map (.getFailures result))})
 
 (core/deftask junit
   "Run the jUnit test runner."
@@ -19,5 +25,5 @@
                               [#_ (magic goes here to find all test classes)]))]
       (when (> (.getFailureCount result) 0)
         (throw (ex-info "There were some test failures."
-                        (destructure-results result)))))
+                        (result->map result)))))
     fileset))
