@@ -20,10 +20,12 @@
   "Run the jUnit test runner."
   [p packages PACKAGE #{sym} "The set of Java packages to run tests in."]
   (core/with-pre-wrap fileset
-    (let [result (JUnitCore/runClasses
-                  (into-array Class
-                              [#_ (magic goes here to find all test classes)]))]
-      (when (> (.getFailureCount result) 0)
-        (throw (ex-info "There were some test failures."
-                        (result->map result)))))
+    (if (seq packages)
+      (let [result (JUnitCore/runClasses
+                    (into-array Class
+                                [#_ (magic goes here to find all test classes)]))]
+        (when (> (.getFailureCount result) 0)
+          (throw (ex-info "There were some test failures."
+                          (result->map result)))))
+      (println "No packages were tested."))
     fileset))
