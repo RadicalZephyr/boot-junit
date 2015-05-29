@@ -32,7 +32,7 @@
             (setScanners (into-array Scanner [(TypeAnnotationsScanner.)
                                               (MethodAnnotationsScanner.)]))
             (filterInputsBy (.. (FilterBuilder.)
-                                (includePackage package))))
+                                (includePackage (into-array String [package])))))
         reflections (Reflections. config)
         test-methods (.getMethodsAnnotatedWith reflections
                                                org.junit.Test)]
