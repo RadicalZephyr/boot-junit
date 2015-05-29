@@ -1,4 +1,4 @@
-package net.zephyrizing.http_server;
+package radicalzephyr.boot_junit.test;
 
 public class Calculator {
     public int evaluate(String expression) {

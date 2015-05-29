@@ -1,4 +1,4 @@
-package net.zephyrizing.http_server_test;
+package radicalzephyr.boot_junit.test;
 
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
