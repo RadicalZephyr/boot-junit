@@ -1,6 +1,6 @@
 (ns radicalzephyr.boot-junit
   {:boot/export-tasks true}
-  (:require '[[boot.core :as core]])
+  (:require [boot.core :as core])
   (:import org.junit.runner.JUnitCore))
 
 (defn destructure-results [result]
