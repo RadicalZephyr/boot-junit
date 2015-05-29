@@ -20,7 +20,7 @@
   {:successful? (.wasSuccessful result)
    :run-time (.getRunTime result)
    :run     (.getRunCount result)
-   :ignored (.getIgnoredCount result)
+   :ignored (.getIgnoreCount result)
    :failed  (.getFailureCount result)
    :failures (map failure->map (.getFailures result))})
 
