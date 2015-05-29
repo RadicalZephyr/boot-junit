@@ -4,7 +4,11 @@
   (:import org.junit.runner.JUnitCore))
 
 (defn destructure-results [result]
-  {})
+  {:successful? (.wasSuccessful result)
+   :run-time (.getRunTime result)
+   :run     (.getRunCount result)
+   :ignored (.getIgnoredCount result)
+   :failed  (.getFailureCount result)})
 
 (core/deftask junit
   "Run the jUnit test runner."
