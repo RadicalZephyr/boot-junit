@@ -1,7 +1,8 @@
 (ns radicalzephyr.boot-junit
   {:boot/export-tasks true}
   (:require [boot.core :as core])
-  (:import org.junit.runner.JUnitCore))
+  (:import org.junit.runner.JUnitCore
+           org.reflections.Reflections))
 
 (defn failure->map [failure]
   {:description (.. failure (getDescription) (toString))
@@ -17,7 +18,13 @@
    :failures (map failure->map (.getFailures result))})
 
 (defn find-all-tests [packages]
-  [])
+  (let [reflections (Reflections. (first packages))
+        test-methods (.getMethodsAnnotatedWith reflections
+                                               org.junit.Test)]
+    (->> test-methods
+         (map (memfn getDeclaringClass))
+         set
+         vec)))
 
 (core/deftask junit
   "Run the jUnit test runner."
