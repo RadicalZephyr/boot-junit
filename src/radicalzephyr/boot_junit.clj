@@ -27,7 +27,7 @@
   (let [^String package (str (first packages))
         ^Configuration config
         (.. (ConfigurationBuilder.)
-            (setUrls (ClasspathHelper/forPackage package))
+            (setUrls (ClasspathHelper/forPackage package (into-array ClassLoader [])))
             (setScanners (TypeAnnotationsScanner.)
                          (MethodAnnotationsScanner.))
             (filterInputsBy (.. (FilterBuilder.)

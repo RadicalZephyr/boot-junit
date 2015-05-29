@@ -2,9 +2,9 @@
  :source-paths #{"src"}
  :dependencies '[[org.clojure/clojure  "1.6.0" :scope "provided"]
                  [boot/core            "2.1.0" :scope "provided"]
-                 [junit                "4.12"  :scope "provided"]
-                 [org.reflections/reflections "0.9.10"
-                  :scope "provided"]])
+                 [junit                "4.12"]
+                 [org.reflections/reflections "0.9.10"]
+                 [org.glassfish/javax.servlet "3.0"]])
 
 (require '[radicalzephyr.boot-junit :refer [junit]])
 
