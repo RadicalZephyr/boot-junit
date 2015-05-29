@@ -1,8 +1,9 @@
 package radicalzephyr.boot_junit.test;
 
+import radicalzephyr.boot_junit.test.Calculator;
+
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
-import net.zephyrizing.http_server.Calculator;
 
 public class CalculatorTest {
     @Test
