@@ -2,6 +2,8 @@
   {:boot/export-tasks true}
   (:require [boot.core :as core])
   (:import org.junit.runner.JUnitCore
+           (org.junit.internal JUnitSystem
+                               RealSystem)
            (org.reflections Reflections
                             Configuration)
            (org.reflections.scanners Scanner
@@ -11,9 +13,15 @@
                                  ConfigurationBuilder
                                  FilterBuilder)))
 
+(defn invoke-private-method [obj fn-name-string & args]
+  (let [m (first (filter (fn [x] (.. x getName (equals fn-name-string)))
+                         (.. obj getClass getDeclaredMethods)))]
+    (. m (setAccessible true))
+    (. m (invoke obj (into-array Object args)))))
+
 (defn failure->map [failure]
   {:description (.. failure (getDescription) (toString))
-   :exception (.getException failure)
+   ;;:exception (.getException failure)
    :message (.getMessage failure)})
 
 (defn result->map [result]
@@ -46,11 +54,15 @@
   [p packages PACKAGE #{sym} "The set of Java packages to run tests in."]
   (core/with-pre-wrap fileset
     (if (seq packages)
-      (let [result (JUnitCore/runClasses
-                    (into-array Class
-                                (find-all-tests packages)))]
+      (let [^JUnitCore core (JUnitCore.)
+            ^JUnitSystem system (RealSystem.)
+            result (invoke-private-method core "runMain"
+                                          system
+                                          (into-array String
+                                                      (map (memfn getName)
+                                                           (find-all-tests packages))))]
         (when (> (.getFailureCount result) 0)
-          (throw (ex-info "There were some test failures."
-                          (result->map result)))))
+          #_(throw (ex-info "There were some test failures."
+                            (result->map result)))))
       (println "No packages were tested."))
     fileset))
