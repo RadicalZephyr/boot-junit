@@ -55,8 +55,8 @@
       (println "\nTest run finished!"))
     (testStarted [description]
       (print "."))
-    (testFinished [description]
-      (print "F"))))
+    (testFailure [failure]
+      (print "E"))))
 
 (core/deftask junit
   "Run the jUnit test runner."
