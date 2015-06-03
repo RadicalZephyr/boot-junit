@@ -25,14 +25,16 @@
    :failed  (.getFailureCount result)
    :failures (map failure->map (.getFailures result))})
 
-(defn find-tests-in-package [^String package]
-  (let [^Configuration config
-        (.. (ConfigurationBuilder.)
-            (setUrls (ClasspathHelper/forPackage package (into-array ClassLoader [])))
-            (setScanners (into-array Scanner [(TypeAnnotationsScanner.)
-                                              (MethodAnnotationsScanner.)]))
-            (filterInputsBy (.. (FilterBuilder.)
-                                (includePackage (into-array String [package])))))
+(defn build-package-config [^String package]
+  (.. (ConfigurationBuilder.)
+      (setUrls (ClasspathHelper/forPackage package (into-array ClassLoader [])))
+      (setScanners (into-array Scanner [(TypeAnnotationsScanner.)
+                                        (MethodAnnotationsScanner.)]))
+      (filterInputsBy (.. (FilterBuilder.)
+                          (includePackage (into-array String [package]))))))
+
+(defn find-tests-in-package [package]
+  (let [^Configuration config (build-package-config package)
         reflections (Reflections. config)
         test-methods (.getMethodsAnnotatedWith reflections
                                                org.junit.Test)]
