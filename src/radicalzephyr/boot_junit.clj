@@ -25,9 +25,8 @@
    :failed  (.getFailureCount result)
    :failures (map failure->map (.getFailures result))})
 
-(defn find-all-tests [packages]
-  (let [^String package (str (first packages))
-        ^Configuration config
+(defn find-tests-in-package [^String package]
+  (let [^Configuration config
         (.. (ConfigurationBuilder.)
             (setUrls (ClasspathHelper/forPackage package (into-array ClassLoader [])))
             (setScanners (into-array Scanner [(TypeAnnotationsScanner.)
@@ -41,6 +40,11 @@
          (map (memfn getDeclaringClass))
          set
          vec)))
+
+(defn find-all-tests [packages]
+  (->> packages
+       (map str)
+       (mapcat find-tests-in-package)))
 
 (def run-listener
   (proxy [RunListener]
