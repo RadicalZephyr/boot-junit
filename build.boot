@@ -1,10 +1,11 @@
 (set-env!
  :source-paths #{"src"}
- :dependencies '[[org.clojure/clojure  "1.6.0" :scope "provided"]
-                 [boot/core            "2.1.0" :scope "provided"]
-                 [junit                "4.12"]
-                 [org.reflections/reflections "0.9.10"]
-                 [org.glassfish/javax.servlet "3.0"]])
+ :dependencies '[[org.clojure/clojure         "1.6.0"  :scope "provided"]
+                 [boot/core                   "2.1.0"  :scope "provided"]
+                 [junit                       "4.12"   :scope "test"]
+                 [org.reflections/reflections "0.9.10" :scope "test"]
+                 [org.glassfish/javax.servlet "3.0"    :scope "test"]
+                 [radicalzephyr/clansi        "1.2.0"  :scope "test"]])
 
 (require '[radicalzephyr.boot-junit :refer [junit]])
 
