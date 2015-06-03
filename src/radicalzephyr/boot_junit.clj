@@ -12,12 +12,12 @@
                                  ConfigurationBuilder
                                  FilterBuilder)))
 
-(defn failure->map [failure]
+(defn- failure->map [failure]
   {:description (.. failure (getDescription) (toString))
    ;;:exception (.getException failure)
    :message (.getMessage failure)})
 
-(defn result->map [result]
+(defn- result->map [result]
   {:successful? (.wasSuccessful result)
    :run-time (.getRunTime result)
    :run     (.getRunCount result)
@@ -25,7 +25,7 @@
    :failed  (.getFailureCount result)
    :failures (map failure->map (.getFailures result))})
 
-(defn build-package-config [^String package]
+(defn- build-package-config [^String package]
   (.. (ConfigurationBuilder.)
       (setUrls (ClasspathHelper/forPackage package (into-array ClassLoader [])))
       (setScanners (into-array Scanner [(TypeAnnotationsScanner.)
@@ -33,20 +33,20 @@
       (filterInputsBy (.. (FilterBuilder.)
                           (includePackage (into-array String [package]))))))
 
-(defn find-tests-in-package [package]
+(defn- find-tests-in-package [package]
   (let [^Configuration config (build-package-config package)
         reflections (Reflections. config)
         test-methods (.getMethodsAnnotatedWith reflections
                                                org.junit.Test)]
     (map (memfn getDeclaringClass) test-methods)))
 
-(defn find-all-tests [packages]
+(defn- find-all-tests [packages]
   (->> packages
        (map str)
        (mapcat find-tests-in-package)
        set))
 
-(def run-listener
+(def ^:private run-listener
   (proxy [RunListener]
       []
     (testRunStarted [description]
