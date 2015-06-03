@@ -2,6 +2,7 @@
   {:boot/export-tasks true}
   (:require [boot.core :as core])
   (:import org.junit.runner.JUnitCore
+           org.junit.runner.notification.RunListener
            (org.junit.internal JUnitSystem
                                RealSystem)
            (org.reflections Reflections
@@ -12,12 +13,6 @@
            (org.reflections.util ClasspathHelper
                                  ConfigurationBuilder
                                  FilterBuilder)))
-
-(defn invoke-private-method [obj fn-name-string & args]
-  (let [m (first (filter (fn [x] (.. x getName (equals fn-name-string)))
-                         (.. obj getClass getDeclaredMethods)))]
-    (. m (setAccessible true))
-    (. m (invoke obj (into-array Object args)))))
 
 (defn failure->map [failure]
   {:description (.. failure (getDescription) (toString))
@@ -49,20 +44,29 @@
          set
          vec)))
 
+(def run-listener
+  (proxy [RunListener]
+      []
+    (testRunStarted [description]
+      (println "Test started!"))
+    (testRunFinished [result]
+      (println "\nTest run finished!"))
+    (testStarted [description]
+      (print "."))
+    (testFinished [description]
+      (print "F"))))
+
 (core/deftask junit
   "Run the jUnit test runner."
   [p packages PACKAGE #{sym} "The set of Java packages to run tests in."]
   (core/with-pre-wrap fileset
     (if (seq packages)
-      (let [^JUnitCore core (JUnitCore.)
-            ^JUnitSystem system (RealSystem.)
-            result (invoke-private-method core "runMain"
-                                          system
-                                          (into-array String
-                                                      (map (memfn getName)
-                                                           (find-all-tests packages))))]
+      (let [^JUnitCore core (doto (JUnitCore.)
+                              (.addListener run-listener))
+            result (.run core
+                         (into-array Class
+                                     (find-all-tests packages)))]
         (when (> (.getFailureCount result) 0)
-          #_(throw (ex-info "There were some test failures."
-                            (result->map result)))))
+          (println (result->map result))))
       (println "No packages were tested."))
     fileset))
