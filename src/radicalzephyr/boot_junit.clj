@@ -36,15 +36,13 @@
         reflections (Reflections. config)
         test-methods (.getMethodsAnnotatedWith reflections
                                                org.junit.Test)]
-    (->> test-methods
-         (map (memfn getDeclaringClass))
-         set
-         vec)))
+    (map (memfn getDeclaringClass) test-methods)))
 
 (defn find-all-tests [packages]
   (->> packages
        (map str)
-       (mapcat find-tests-in-package)))
+       (mapcat find-tests-in-package)
+       set))
 
 (def run-listener
   (proxy [RunListener]
