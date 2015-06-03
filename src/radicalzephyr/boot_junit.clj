@@ -3,8 +3,6 @@
   (:require [boot.core :as core])
   (:import org.junit.runner.JUnitCore
            org.junit.runner.notification.RunListener
-           (org.junit.internal JUnitSystem
-                               RealSystem)
            (org.reflections Reflections
                             Configuration)
            (org.reflections.scanners Scanner
