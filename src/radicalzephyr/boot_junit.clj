@@ -51,12 +51,15 @@
       []
     (testRunStarted [description]
       (println "Test started!"))
+
     (testRunFinished [result]
       (println "\nTest run finished!")
       (when (> (.getFailureCount result) 0)
         (println (result->map result))))
+
     (testStarted [description]
       (print "."))
+
     (testFailure [failure]
       (print "E"))))
 
