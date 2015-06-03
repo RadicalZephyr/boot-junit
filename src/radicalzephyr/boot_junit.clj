@@ -52,7 +52,9 @@
     (testRunStarted [description]
       (println "Test started!"))
     (testRunFinished [result]
-      (println "\nTest run finished!"))
+      (println "\nTest run finished!")
+      (when (> (.getFailureCount result) 0)
+        (println (result->map result))))
     (testStarted [description]
       (print "."))
     (testFailure [failure]
@@ -64,11 +66,9 @@
   (core/with-pre-wrap fileset
     (if (seq packages)
       (let [^JUnitCore core (doto (JUnitCore.)
-                              (.addListener run-listener))
-            result (.run core
-                         (into-array Class
-                                     (find-all-tests packages)))]
-        (when (> (.getFailureCount result) 0)
-          (println (result->map result))))
+                              (.addListener run-listener))]
+        (.run core
+              (into-array Class
+                          (find-all-tests packages))))
       (println "No packages were tested."))
     fileset))
