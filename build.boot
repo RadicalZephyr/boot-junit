@@ -6,11 +6,14 @@
                  [junit                       "4.12"  ]
                  [org.reflections/reflections "0.9.10"]
                  [org.glassfish/javax.servlet "3.0"   ]
-                 [radicalzephyr/clansi        "1.2.0" ]])
+                 [radicalzephyr/bootlaces     "0.1.12"]])
 
-(require '[radicalzephyr.boot-junit :refer [junit]])
+(require '[radicalzephyr.bootlaces :refer :all]
+         '[radicalzephyr.boot-junit :refer [junit]])
 
 (def +version+ "0.1.0")
+
+(bootlaces! +version+)
 
 (task-options!
  pom  {:project     'radicalzephyr/boot-junit
