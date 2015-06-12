@@ -70,9 +70,11 @@
   (core/with-pre-wrap fileset
     (if (seq packages)
       (let [^JUnitCore core (doto (JUnitCore.)
-                              (.addListener (run-listener packages)))]
-        (.run core
-              (into-array Class
-                          (find-all-tests packages))))
+                              (.addListener (run-listener packages)))
+            result (.run core
+                         (into-array Class
+                                     (find-all-tests packages)))]
+        (when (> (.getFailureCount result) 0)
+          (throw (ex-info "Some tests failed or errored" {}))))
       (println "No packages were tested."))
     fileset))
