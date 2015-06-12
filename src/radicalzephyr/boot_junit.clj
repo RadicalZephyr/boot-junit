@@ -15,19 +15,6 @@
                                  ConfigurationBuilder
                                  FilterBuilder)))
 
-(defn- failure->map [failure]
-  {:description (.. failure (getDescription) (toString))
-   ;;:exception (.getException failure)
-   :message (.getMessage failure)})
-
-(defn- result->map [result]
-  {:successful? (.wasSuccessful result)
-   :run-time (.getRunTime result)
-   :run     (.getRunCount result)
-   :ignored (.getIgnoreCount result)
-   :failed  (.getFailureCount result)
-   :failures (map failure->map (.getFailures result))})
-
 (defn- build-package-config [^String package]
   (.. (ConfigurationBuilder.)
       (setUrls (ClasspathHelper/forPackage package (into-array ClassLoader [])))
