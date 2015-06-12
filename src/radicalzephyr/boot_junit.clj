@@ -40,18 +40,20 @@
   (when (seq ignored-tests)
     (println "Ignored:")
     (println)
-    (doseq [ignored ignored-tests]
-      (println (style (.getDisplayName ignored) :yellow))
+    (doseq [[i ignored] (map-indexed vector ignored-tests)]
+      (printf "  %d) %s\n"
+              (inc i) (style (.getDisplayName ignored) :yellow))
       (println))))
 
 (defn- print-failed-tests [test-failures]
   (when (seq test-failures)
     (println "Failed:")
     (println)
-    (doseq [failure test-failures]
-      (println (.getTestHeader failure))
-      (println (style (.getTrace failure)
-                      :red))
+    (doseq [[i failure] (map-indexed vector test-failures)]
+      (printf "  %d) %s\n"
+              (inc i) (.getTestHeader failure))
+      (printf "     %s\n" (style (.getTrace failure)
+                              :red))
       (println))))
 
 (defn- print-test-summary [result]
@@ -74,7 +76,7 @@
                  (str/join ", " packages)))
 
       (testRunFinished [result]
-        (println "\n")
+        (print "\n\n")
         (print-ignored-tests @ignored-tests)
         (print-failed-tests (.getFailures result))
         (print-test-summary result))
