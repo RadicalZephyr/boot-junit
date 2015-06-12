@@ -56,6 +56,16 @@
       (println (style (.getDisplayName ignored) :yellow))
       (println))))
 
+(defn- print-failed-tests [test-failures]
+  (when (seq test-failures)
+    (println "Failed:")
+    (println)
+    (doseq [failure test-failures]
+      (println (.getTestHeader failure))
+      (println (style (.getTrace failure)
+                      :red))
+      (println))))
+
 (defn- run-listener [packages]
   (let [running-tests (atom #{})
         ignored-tests (atom #{})]
@@ -68,7 +78,7 @@
       (testRunFinished [result]
         (println "\n")
         (print-ignored-tests @ignored-tests)
-
+        (print-failed-tests (.getFailures result))
         (when (> (.getFailureCount result) 0)
           (println (result->map result))))
 
