@@ -58,11 +58,11 @@
       (when (> (.getFailureCount result) 0)
         (println (result->map result))))
 
-    (testStarted [description]
-      (print "."))
+    (testIgnored [description]
+      (print "I"))
 
     (testFailure [failure]
-      (print "E"))))
+      (print "F"))))
 
 (core/deftask junit
   "Run the jUnit test runner."
