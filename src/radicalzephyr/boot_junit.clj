@@ -48,21 +48,34 @@
        set))
 
 (defn- run-listener [packages]
-  (proxy [RunListener]
-      []
-    (testRunStarted [description]
-      (println "Running jUnit tests for " (str/join ", " packages)))
+  (let [running-tests (atom #{})]
+    (proxy [RunListener]
+        []
+      (testRunStarted [description]
+        (println "Running jUnit tests for "
+                 (str/join ", " packages)))
 
-    (testRunFinished [result]
-      (println "\nTest run finished!")
-      (when (> (.getFailureCount result) 0)
-        (println (result->map result))))
+      (testRunFinished [result]
+        (println "\nTest run finished!")
+        (when (> (.getFailureCount result) 0)
+          (println (result->map result))))
 
-    (testIgnored [description]
-      (print "I"))
+      (testStarted [description]
+        (swap! running-tests conj description))
 
-    (testFailure [failure]
-      (print "F"))))
+      (testIgnored [description]
+        (print "*"))
+
+      (testFinished [description]
+        (when (@running-tests description)
+          (swap! running-tests disj description)
+          (print ".")))
+
+      (testFailure [failure]
+        (let [description (.getDescription failure)]
+          (when (@running-tests description)
+            (swap! running-tests disj description)
+            (print "F")))))))
 
 (core/deftask junit
   "Run the jUnit test runner."
