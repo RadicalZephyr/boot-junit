@@ -19,15 +19,16 @@ included in your boot `:source-paths`:
      :source-paths #{"src/main/java" "src/test/java"}
      ...)
 
-Then, configure the `junit` task with the packages to be searched for
-jUnit tests. Currently this must be done manually, but in the future
-we plan to support inferring packages from the given source-paths.
+Optionally, you can configure the `junit` task with the packages to be
+searched for jUnit tests.
 
     (task-options!
      junit {:packages '#{radicalzephyr.boot_junit.test}})
 
+If no packages are specified, the task will automatically try to run
+all tests in packages defined in the current project.
 
-Then I typically define a `test` task for ease of use.
+Finally, I typically define a `test` task for ease of use.
 
     (deftask test
       "Compile and run my jUnit tests."
