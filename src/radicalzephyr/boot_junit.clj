@@ -36,6 +36,17 @@
        (mapcat find-tests-in-package)
        set))
 
+(defn- path->package-name [path]
+  (str/join "." (-> path
+                    (str/split #"/")
+                    drop-last)))
+
+(defn- all-packages [user-files]
+  (->> user-files
+       (map core/tmp-path)
+       (map path->package-name)
+       set))
+
 (defn- print-ignored-tests [ignored-tests]
   (when (seq ignored-tests)
     (println "Ignored:")
@@ -53,7 +64,7 @@
       (printf "  %d) %s\n"
               (inc i) (.getTestHeader failure))
       (printf "     %s\n" (style (.getTrace failure)
-                              :red))
+                                 :red))
       (println))))
 
 (defn- print-test-summary [result]
@@ -103,13 +114,15 @@
   "Run the jUnit test runner."
   [p packages PACKAGE #{sym} "The set of Java packages to run tests in."]
   (core/with-pre-wrap fileset
-    (if (seq packages)
-      (let [^JUnitCore core (doto (JUnitCore.)
-                              (.addListener (run-listener packages)))
-            result (.run core
-                         (into-array Class
-                                     (find-all-tests packages)))]
-        (when (> (.getFailureCount result) 0)
-          (throw (ex-info "Some tests failed or errored" {}))))
-      (println "No packages were tested."))
+    (let [packages (or (seq packages)
+                       (all-packages (core/input-files fileset)))]
+      (if (seq packages)
+        (let [^JUnitCore core (doto (JUnitCore.)
+                                (.addListener (run-listener packages)))
+              result (.run core
+                           (into-array Class
+                                       (find-all-tests packages)))]
+          (when (> (.getFailureCount result) 0)
+            (throw (ex-info "Some tests failed or errored" {}))))
+        (println "No packages were tested.")))
     fileset))
