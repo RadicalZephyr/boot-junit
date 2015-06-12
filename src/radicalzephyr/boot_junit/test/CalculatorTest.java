@@ -1,9 +1,10 @@
 package radicalzephyr.boot_junit.test;
 
-import radicalzephyr.boot_junit.test.Calculator;
-
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
+import org.junit.Ignore;
+
+import radicalzephyr.boot_junit.test.Calculator;
 
 public class CalculatorTest {
     @Test
@@ -16,5 +17,11 @@ public class CalculatorTest {
     @Test
     public void reportsErrors() {
         assertEquals(true, false);
+    }
+
+    @Ignore
+    @Test
+    public void ignoredTest() {
+        assertEquals(true, true);
     }
 }
