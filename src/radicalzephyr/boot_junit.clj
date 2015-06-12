@@ -48,6 +48,14 @@
        (mapcat find-tests-in-package)
        set))
 
+(defn- print-ignored-tests [ignored-tests]
+  (when (seq ignored-tests)
+    (println "Ignored:")
+    (println)
+    (doseq [ignored ignored-tests]
+      (println (style (.getDisplayName ignored) :yellow))
+      (println))))
+
 (defn- run-listener [packages]
   (let [running-tests (atom #{})
         ignored-tests (atom #{})]
@@ -59,12 +67,7 @@
 
       (testRunFinished [result]
         (println "\n")
-        (when @ignored-tests
-          (println "Ignored:")
-          (println)
-          (doseq [ignored @ignored-tests]
-            (println (style (.getDisplayName ignored) :yellow))
-            (println)))
+        (print-ignored-tests @ignored-tests)
 
         (when (> (.getFailureCount result) 0)
           (println (result->map result))))
