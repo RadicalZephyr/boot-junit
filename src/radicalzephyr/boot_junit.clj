@@ -2,6 +2,7 @@
   {:boot/export-tasks true}
   (:require [boot.core :as core]
             [clojure.string :as str]
+            [clojure.pprint :refer [cl-format]]
             [clansi.core    :refer [style]])
   (:import org.junit.runner.JUnitCore
            org.junit.runner.notification.RunListener
@@ -66,6 +67,16 @@
                       :red))
       (println))))
 
+(defn- print-test-summary [result]
+  (printf "Finished in %s seconds\n" (float (/ (.getRunTime result) 1000)))
+  (let [run-count     (.getRunCount      result)
+        ignore-count  (.getIgnoreCount   result)
+        failure-count (.getFailureCount  result)
+        test-count (+ run-count ignore-count)]
+    (println (style (cl-format nil "~D test~:P, ~D failure~:P~[~;, ~:*~D ignored~]~%"
+                               test-count failure-count ignore-count)
+                    (if (> failure-count 0) :red :green)))))
+
 (defn- run-listener [packages]
   (let [running-tests (atom #{})
         ignored-tests (atom #{})]
@@ -79,8 +90,7 @@
         (println "\n")
         (print-ignored-tests @ignored-tests)
         (print-failed-tests (.getFailures result))
-        (when (> (.getFailureCount result) 0)
-          (println (result->map result))))
+        (print-test-summary result))
 
       (testStarted [description]
         (swap! running-tests conj description))
