@@ -1,7 +1,8 @@
 (ns radicalzephyr.boot-junit
   {:boot/export-tasks true}
   (:require [boot.core :as core]
-            [clojure.string :as str])
+            [clojure.string :as str]
+            [clansi.core    :refer [style]])
   (:import org.junit.runner.JUnitCore
            org.junit.runner.notification.RunListener
            (org.reflections Reflections
@@ -64,18 +65,18 @@
         (swap! running-tests conj description))
 
       (testIgnored [description]
-        (print "*"))
+        (print (style "*" :yellow)))
 
       (testFinished [description]
         (when (@running-tests description)
           (swap! running-tests disj description)
-          (print ".")))
+          (print (style "." :green))))
 
       (testFailure [failure]
         (let [description (.getDescription failure)]
           (when (@running-tests description)
             (swap! running-tests disj description)
-            (print "F")))))))
+            (print (style "F" :red))))))))
 
 (core/deftask junit
   "Run the jUnit test runner."
