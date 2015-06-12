@@ -49,7 +49,8 @@
        set))
 
 (defn- run-listener [packages]
-  (let [running-tests (atom #{})]
+  (let [running-tests (atom #{})
+        ignored-tests (atom #{})]
     (proxy [RunListener]
         []
       (testRunStarted [description]
@@ -57,7 +58,14 @@
                  (str/join ", " packages)))
 
       (testRunFinished [result]
-        (println "\nTest run finished!")
+        (println "\n")
+        (when @ignored-tests
+          (println "Ignored:")
+          (println)
+          (doseq [ignored @ignored-tests]
+            (println (style (.getDisplayName ignored) :yellow))
+            (println)))
+
         (when (> (.getFailureCount result) 0)
           (println (result->map result))))
 
@@ -65,6 +73,7 @@
         (swap! running-tests conj description))
 
       (testIgnored [description]
+        (swap! ignored-tests conj description)
         (print (style "*" :yellow)))
 
       (testFinished [description]
