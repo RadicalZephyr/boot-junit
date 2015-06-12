@@ -1,6 +1,7 @@
 (ns radicalzephyr.boot-junit
   {:boot/export-tasks true}
-  (:require [boot.core :as core])
+  (:require [boot.core :as core]
+            [clojure.string :as str])
   (:import org.junit.runner.JUnitCore
            org.junit.runner.notification.RunListener
            (org.reflections Reflections
@@ -46,11 +47,11 @@
        (mapcat find-tests-in-package)
        set))
 
-(def ^:private run-listener
+(defn- run-listener [packages]
   (proxy [RunListener]
       []
     (testRunStarted [description]
-      (println "Test started!"))
+      (println "Running jUnit tests for " (str/join ", " packages)))
 
     (testRunFinished [result]
       (println "\nTest run finished!")
@@ -69,7 +70,7 @@
   (core/with-pre-wrap fileset
     (if (seq packages)
       (let [^JUnitCore core (doto (JUnitCore.)
-                              (.addListener run-listener))]
+                              (.addListener (run-listener packages)))]
         (.run core
               (into-array Class
                           (find-all-tests packages))))
