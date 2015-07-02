@@ -2,7 +2,7 @@
 
 [](dependency)
 ```clojure
-[radicalzephyr/boot-junit "0.1.1"] ;; latest release
+[radicalzephyr/boot-junit "0.2.0-SNAPSHOT"] ;; latest release
 ```
 [](/dependency)
 
