@@ -17,12 +17,14 @@
                                  FilterBuilder)))
 
 (def pod-deps
-  '[[radicalzephyr/clansi "1.2.0" :exclusions [org.clojure/clojure]]])
+  '[[radicalzephyr/clansi "1.2.0" :exclusions [org.clojure/clojure]]
+    [clj-stacktrace       "0.2.8" :exclusions [org.clojure/clojure]]])
 
 (defn init [fresh-pod]
   (doto fresh-pod
     (pod/with-eval-in
       (require '[clojure.pprint :refer [cl-format]]
+               '[clj-stacktrace.core :refer [parse-exception]]
                '[clojure.string :as str]
                '[clansi.core    :refer [style]])
       (import org.junit.runner.JUnitCore
