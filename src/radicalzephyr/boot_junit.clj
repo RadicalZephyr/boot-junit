@@ -57,7 +57,8 @@
             (println))))
 
       (defn- skip-assert-traces [traces]
-        (filter #(not= (:class %) "org.junit.Assert") traces))
+        (filter #(not (or (= (:class %) "org.junit.Assert")
+                          (= (:class %) "org.hamcrest.MatcherAssert"))) traces))
 
       (defn- take-until-reflection [traces]
         (take-while #(not (.contains (:class %) "reflect")) traces))
@@ -78,7 +79,7 @@
           (format "%s: %s\n       %s"
                   (:class ex-map)
                   (:message ex-map)
-                  (str/join "\n      " relevant-traces))))
+                  (str/join "\n       " relevant-traces))))
 
 
       (defn- print-failed-tests [test-failures]
