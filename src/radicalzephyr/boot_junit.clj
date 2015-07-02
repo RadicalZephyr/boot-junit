@@ -75,7 +75,8 @@
                                    skip-assert-traces
                                    take-until-reflection
                                    (map convert-to-message))]
-          (format "%s\n       %s"
+          (format "%s: %s\n       %s"
+                  (:class ex-map)
                   (:message ex-map)
                   (str/join "\n      " relevant-traces))))
 
