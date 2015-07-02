@@ -38,6 +38,30 @@
                     (inc i) (style (.getDisplayName ignored) :yellow))
             (println))))
 
+      (defn- skip-assert-traces [traces]
+        (filter #(not= (:class %) "org.junit.Assert") traces))
+
+      (defn- take-until-reflection [traces]
+        (take-while #(not (.contains (:class %) "reflect")) traces))
+
+      (defn- convert-to-message [trace]
+        (format "%s.%s  %s: %d "
+                (:class trace)
+                (:method trace)
+                (:file trace)
+                (:line trace)))
+
+      (defn- process-trace [throwable]
+        (let [ex-map (parse-exception throwable)
+              relevant-traces (->> (:trace-elems ex-map)
+                                   skip-assert-traces
+                                   take-until-reflection
+                                   (map convert-to-message))]
+          (format "%s\n       %s"
+                  (:message ex-map)
+                  (str/join "\n      " relevant-traces))))
+
+
       (defn- print-failed-tests [test-failures]
         (when (seq test-failures)
           (println "Failed:")
@@ -45,7 +69,7 @@
           (doseq [[i failure] (map-indexed vector test-failures)]
             (printf "  %d) %s\n"
                     (inc i) (.getTestHeader failure))
-            (printf "     %s\n" (style (.getTrace failure)
+            (printf "     %s\n" (style (process-trace (.getException failure))
                                        :red))
             (println))))
 
