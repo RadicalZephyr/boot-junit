@@ -5,135 +5,11 @@
             [clojure.string :as str]))
 
 (def pod-deps
-  '[[radicalzephyr/clansi "1.2.0" :exclusions [org.clojure/clojure]]
-    [clj-stacktrace       "0.2.8" :exclusions [org.clojure/clojure]]])
+  '[[radicalzephyr/cljunit "0.1.0-SNAPSHOT"]])
 
-(defn init [fresh-pod]
-  (doto fresh-pod
-    (pod/with-eval-in
-      (require '[clojure.pprint :refer [cl-format]]
-               '[clj-stacktrace.core :refer [parse-exception]]
-               '[clojure.string :as str]
-               '[clansi.core    :refer [style]])
-      (import org.junit.runner.JUnitCore
-              org.junit.runner.notification.RunListener
-              (org.reflections Reflections
-                               Configuration)
-              (org.reflections.scanners Scanner
-                                        TypeAnnotationsScanner
-                                        MethodAnnotationsScanner)
-              (org.reflections.util ClasspathHelper
-                                    ConfigurationBuilder
-                                    FilterBuilder))
-
-      (defn- build-package-config [^String package]
-        (.. (ConfigurationBuilder.)
-            (setUrls (ClasspathHelper/forPackage package (into-array ClassLoader [])))
-            (setScanners (into-array Scanner [(TypeAnnotationsScanner.)
-                                              (MethodAnnotationsScanner.)]))
-            (filterInputsBy (.. (FilterBuilder.)
-                                (includePackage (into-array String [package]))))))
-
-      (defn- find-tests-in-package [package]
-        (let [^Configuration config (build-package-config package)
-              reflections (Reflections. config)
-              test-methods (.getMethodsAnnotatedWith reflections
-                                                     org.junit.Test)]
-          (map (memfn getDeclaringClass) test-methods)))
-
-      (defn- find-all-tests [packages]
-        (->> packages
-             (map str)
-             (mapcat find-tests-in-package)
-             set))
-
-      (defn- print-ignored-tests [ignored-tests]
-        (when (seq ignored-tests)
-          (println "Ignored:")
-          (println)
-          (doseq [[i ignored] (map-indexed vector ignored-tests)]
-            (printf "  %d) %s\n"
-                    (inc i) (style (.getDisplayName ignored) :yellow))
-            (println))))
-
-      (defn- skip-assert-traces [traces]
-        (filter #(not (or (= (:class %) "org.junit.Assert")
-                          (= (:class %) "org.hamcrest.MatcherAssert"))) traces))
-
-      (defn- take-until-reflection [traces]
-        (take-while #(not (.contains (:class %) "reflect")) traces))
-
-      (defn- convert-to-message [trace]
-        (format "%s.%s  %s: %d "
-                (:class trace)
-                (:method trace)
-                (:file trace)
-                (:line trace)))
-
-      (defn- process-trace [throwable]
-        (let [ex-map (parse-exception throwable)
-              relevant-traces (->> (:trace-elems ex-map)
-                                   skip-assert-traces
-                                   take-until-reflection
-                                   (map convert-to-message))]
-          (format "%s: %s\n       %s"
-                  (:class ex-map)
-                  (:message ex-map)
-                  (str/join "\n       " relevant-traces))))
-
-
-      (defn- print-failed-tests [test-failures]
-        (when (seq test-failures)
-          (println "Failed:")
-          (println)
-          (doseq [[i failure] (map-indexed vector test-failures)]
-            (printf "  %d) %s\n"
-                    (inc i) (.getTestHeader failure))
-            (printf "     %s\n" (style (process-trace (.getException failure))
-                                       :red))
-            (println))))
-
-      (defn- print-test-summary [result]
-        (printf "Finished in %s seconds\n" (float (/ (.getRunTime result) 1000)))
-        (let [run-count     (.getRunCount      result)
-              ignore-count  (.getIgnoreCount   result)
-              failure-count (.getFailureCount  result)
-              test-count (+ run-count ignore-count)]
-          (println (style (cl-format nil "~D test~:P, ~D failure~:P~[~;, ~:*~D ignored~]~%"
-                                     test-count failure-count ignore-count)
-                          (if (> failure-count 0) :red :green)))))
-      (defn run-listener [packages]
-        (let [running-tests (atom #{})
-              ignored-tests (atom #{})]
-          (proxy [RunListener]
-              []
-            (testRunStarted [description]
-              (println "Running jUnit tests for"
-                       (str/join ", " packages)))
-
-            (testRunFinished [result]
-              (print "\n\n")
-              (print-ignored-tests @ignored-tests)
-              (print-failed-tests (.getFailures result))
-              (print-test-summary result))
-
-            (testStarted [description]
-              (swap! running-tests conj description))
-
-            (testIgnored [description]
-              (swap! ignored-tests conj description)
-              (print (style "*" :yellow)))
-
-            (testFinished [description]
-              (when (@running-tests description)
-                (swap! running-tests disj description)
-                (print (style "." :green))))
-
-            (testFailure [failure]
-              (let [description (.getDescription failure)]
-                (when (@running-tests description)
-                  (swap! running-tests disj description)
-                  (print (style "F" :red)))))))))))
+(defn- init [fresh-pod]
+  (pod/with-eval-in fresh-pod
+    (require '[cljunit.core :refer [run-tests-in-packages]])))
 
 (defn- path->package-name [path]
   (str/join "." (-> path
@@ -158,12 +34,7 @@
                          (all-packages (core/input-files fileset)))]
         (if (seq packages)
           (let [result (pod/with-eval-in worker-pod
-                         (let [^JUnitCore core (doto (JUnitCore.)
-                                                 (.addListener (run-listener '~packages)))
-                               result (.run core
-                                            (into-array Class
-                                                        (find-all-tests '~packages)))]
-                           {:failures (.getFailureCount result)}))]
+                         (run-tests-in-packages '~packages))]
             (when (> (:failures result) 0)
               (throw (ex-info "Some tests failed or errored" {}))))
           (println "No packages were tested.")))

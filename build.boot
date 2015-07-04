@@ -1,14 +1,10 @@
 (set-env!
  :source-paths #{"src"}
  :resource-paths #{"src"}
- :dependencies '[[org.clojure/clojure         "1.6.0"  :scope "provided"]
-                 [boot/core                   "2.1.0"  :scope "provided"]
-                 [radicalzephyr/clansi        "1.2.0" ]
-                 [clj-stacktrace              "0.2.8"]
-                 [junit                       "4.12"  ]
-                 [org.reflections/reflections "0.9.10"]
-                 [org.glassfish/javax.servlet "3.0"   ]
-                 [radicalzephyr/bootlaces     "0.1.12"]])
+ :dependencies '[[org.clojure/clojure     "1.6.0"  :scope "provided"]
+                 [boot/core               "2.1.0"  :scope "provided"]
+                 [junit                   "4.12"]
+                 [radicalzephyr/bootlaces "0.1.12"]])
 
 (require '[radicalzephyr.bootlaces :refer :all]
          '[radicalzephyr.boot-junit :refer [junit]])
