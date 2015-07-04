@@ -9,7 +9,7 @@
 (require '[radicalzephyr.bootlaces :refer :all]
          '[radicalzephyr.boot-junit :refer [junit]])
 
-(def +version+ "0.2.0-SNAPSHOT")
+(def +version+ "0.2.0")
 
 (bootlaces! +version+)
 
