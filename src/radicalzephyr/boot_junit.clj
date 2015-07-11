@@ -24,13 +24,13 @@
 
 (core/deftask junit
   "Run the jUnit test runner."
-  [p packages PACKAGE #{sym} "The set of Java packages to run tests in."]
+  [p paths    PATH  #{str} "The set of source paths to search for tests."]
   (let [worker-pods (pod/pod-pool (update-in (core/get-env) [:dependencies] into pod-deps)
                                   :init init)]
     (core/cleanup (worker-pods :shutdown))
     (core/with-pre-wrap fileset
       (let [worker-pod (worker-pods :refresh)
-            packages (or (seq packages)
+            packages (or (seq (map path->package-name paths))
                          (all-packages (core/input-files fileset)))]
         (if (seq packages)
           (let [result (pod/with-eval-in worker-pod
