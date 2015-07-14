@@ -4,7 +4,7 @@
  :dependencies '[[org.clojure/clojure     "1.6.0" :scope "provided"]
                  [boot/core               "2.1.0" :scope "provided"]
                  [junit                   "4.12"  :scope "test"]
-                 [radicalzephyr/bootlaces "0.1.12"]])
+                 [radicalzephyr/bootlaces "0.1.15-SNAPSHOT"]])
 
 (require '[radicalzephyr.bootlaces :refer :all]
          '[radicalzephyr.boot-junit :refer [junit]])
