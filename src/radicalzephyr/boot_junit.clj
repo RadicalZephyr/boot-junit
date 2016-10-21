@@ -6,8 +6,7 @@
             [clojure.java.io :as io]
             [clojure.string :as str]
             [clojure.set :as set]
-            [cljunit.core :refer [run-test-classes
-                                  run-tests-in-packages]])
+            [cljunit.core :refer [run-tests-in-classes]])
   (:import java.io.ByteArrayOutputStream
            java.util.Arrays
            java.util.concurrent.ConcurrentHashMap
@@ -26,31 +25,38 @@
                     (str/split #"/")
                     drop-last)))
 
-(defn- all-packages [user-files]
+(defn- construct-class-name [prefix path]
+  (let [path-seq (-> path
+                     (str/replace prefix "")
+                     (str/replace #"\.java$" "")
+                     (str/split #"/"))]
+    (->> path-seq
+         (remove empty?)
+         (interpose ".")
+         (apply str))))
+
+(defn- path->class-name [class-name]
+  (let [prefix (str (core/tmp-dir class-name))
+        file (core/tmp-file class-name)]
+    (construct-class-name prefix (str file))))
+
+(defn- all-class-names [user-files]
   (->> user-files
-       (map core/tmp-path)
-       (map path->package-name)
-       set))
+       (core/by-ext [".java"])
+       (map path->class-name)))
 
 (core/deftask junit
   "Run the jUnit test runner."
-  [p paths    PATH  #{str} "The set of source paths to search for tests."
-   c classes  CLASS #{str} "The set of Java class names to run as tests."]
+  [;;p paths    PATH  #{str} "The set of source paths to search for tests."
+   ;c classes  CLASS #{str} "The set of Java class names to run as tests."
+   ]
   (core/with-pre-wrap fileset
-    (let [packages (or (seq (map path->package-name paths))
-                       (all-packages (core/input-files fileset)))]
-      (cond
-        (seq classes)
-        (let [result (run-test-classes packages classes)]
-          (when (> (:failures result) 0)
-            (throw (ex-info "Some tests failed or errored" {}))))
-
-        (seq packages)
-        (let [result (run-tests-in-packages packages)]
-          (when (> (:failures result) 0)
-            (throw (ex-info "Some tests failed or errored" {}))))
-
-        :else (println "No packages were tested.")))
+    (let [all-class-names (all-class-names (core/input-files fileset))
+          packages (seq (map path->package-name paths))]
+      (if-let [result (run-tests-in-classes all-class-names)]
+        (when (> (:failures result) 0)
+          (throw (ex-info "Some tests failed or errored" {})))
+        (println "No packages were tested.")))
     fileset))
 
 (def ^ConcurrentHashMap class-cache
@@ -58,7 +64,7 @@
       (doto (.setAccessible true))
       (.get nil)))
 
-(defn source-object
+(defn- source-object
   [class-name source]
   (proxy [SimpleJavaFileObject]
       [(java.net.URI/create (str "string:///"
@@ -67,7 +73,7 @@
        JavaFileObject$Kind/SOURCE]
       (getCharContent [_] source)))
 
-(defn class-object
+(defn- class-object
   "Returns a JavaFileObject to store a class file's bytecode."
   [class-name baos]
   (proxy [SimpleJavaFileObject]
@@ -77,7 +83,7 @@
        JavaFileObject$Kind/CLASS]
     (openOutputStream [] baos)))
 
-(defn class-manager
+(defn- class-manager
   [cl manager cache]
   (proxy [ForwardingJavaFileManager] [manager]
     (getClassLoader [location]
@@ -89,7 +95,7 @@
           (swap! assoc class-name (ByteArrayOutputStream.))
           (get class-name))))))
 
-(defn source->bytecode [opts diag-coll class-name source]
+(defn- source->bytecode [opts diag-coll class-name source]
   (let [compiler   (or (ToolProvider/getSystemJavaCompiler)
                        (throw (Exception. "The java compiler is not working. Please make sure you use a JDK!")))
         cache    (atom {})
@@ -102,23 +108,13 @@
             vals
             (map #(.toByteArray ^ByteArrayOutputStream %)))))))
 
-(defn compile-java
+(defn- compile-java
   [opts diag-coll class-name source]
   (let [cl              (clojure.lang.RT/makeClassLoader)
         class->bytecode (source->bytecode opts diag-coll class-name source)]
     (doseq [[class-name bytecode] class->bytecode]
       (.defineClass ^DynamicClassLoader cl class-name bytecode nil))
     (keys class->bytecode)))
-
-(defn construct-class-name [prefix path]
-  (let [path-seq (-> path
-                     (str/replace prefix "")
-                     (str/replace #"\.java$" "")
-                     (str/split #"/"))]
-    (->> path-seq
-         (remove empty?)
-         (interpose ".")
-         (apply str))))
 
 (core/deftask javac*
   "Compile java sources."
@@ -142,7 +138,6 @@
             (let [prefix (str (core/tmp-dir tmp-src))
                   file (core/tmp-file tmp-src)
                   class-name (construct-class-name prefix (str file))]
-              #_(println (format "classname: %s" class-name))
               (compile-java opts diag-coll class-name (slurp file))))
           (doseq [d (.getDiagnostics diag-coll) :let [k (.getKind d)]]
             (when (= Diagnostic$Kind/ERROR k) (reset! throw? true))
