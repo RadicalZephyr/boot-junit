@@ -8,7 +8,7 @@
 
 Boot task for running jUnit Java tests.
 
-- Provides a `junit` task
+- Provides `javac*` and `junit` tasks
 
 ## Usage
 
@@ -19,21 +19,29 @@ included in your boot `:source-paths`:
      :source-paths #{"src/main/java" "src/test/java"}
      ...)
 
-Optionally, you can configure the `junit` task with the packages to be
-searched for jUnit tests.
-
-    (task-options!
-     junit {:packages '#{radicalzephyr.boot_junit.test}})
-
-If no packages are specified, the task will automatically try to run
-all tests in packages defined in the current project.
+The task will automatically try to run all tests in packages defined
+in the current project.
 
 Finally, I typically define a `test` task for ease of use.
 
-    (deftask test
-      "Compile and run my jUnit tests."
-      []
-      (comp (javac)
-            (junit)))
+``` clojure
+(deftask test
+  "Compile and run my jUnit tests."
+  []
+  (comp (javac*)
+        (junit)))
+```
 
 Now just run `boot test`!
+
+### `watch`-ing your tests
+
+If you want to run your `junit` tests inside a boot `watch` pipeline
+(and really, isn't that what we all want, deep down?), you __must__
+use the provided `javac*` task. Some day I'll write about why that's
+necessary.
+
+# Important Note
+
+DO NOT use the `javac*` task for building artifacts like jar-files or
+war-files. __It does not produce `.class` files!!!!__
