@@ -2,50 +2,56 @@
   {:boot/export-tasks true}
   (:require [boot.core :as core]
             [boot.pod  :as pod]
+            [boot.util  :as util]
             [clojure.string :as str]))
 
 (def pod-deps
-  '[[radicalzephyr/cljunit "0.1.1-SNAPSHOT"]])
+  '[[radicalzephyr/cljunit "0.2.0-SNAPSHOT"]])
 
 (defn- init [fresh-pod]
   (pod/with-eval-in fresh-pod
-    (require '[cljunit.core :refer [run-test-classes
-                                    run-tests-in-packages]])))
+    (require '[cljunit.core :refer [run-tests-in-classes]])))
+
+(defn- construct-class-name [prefix path]
+  (let [path-seq (-> path
+                     (str/replace prefix "")
+                     (str/replace #"\.java$" "")
+                     (str/split #"/"))]
+    (->> path-seq
+         (remove empty?)
+         (interpose ".")
+         (apply str))))
+
+(defn- path->class-name [class-name]
+  (let [prefix (str (core/tmp-dir class-name))
+        file (core/tmp-file class-name)]
+    (construct-class-name prefix (str file))))
 
 (defn- path->package-name [path]
   (str/join "." (-> path
                     (str/split #"/")
                     drop-last)))
 
-(defn- all-packages [user-files]
+(defn- all-class-names [user-files]
   (->> user-files
-       (map core/tmp-path)
-       (map path->package-name)
-       set))
+       (core/by-ext [".java"])
+       (map path->class-name)))
 
 (core/deftask junit
   "Run the jUnit test runner."
-  [p paths    PATH  #{str} "The set of source paths to search for tests."
-   c classes  CLASS #{str} "The set of Java class names to run as tests."]
+  [c class-names  CLASSNAME #{str} "The set of Java class names to run tests from."
+   p packages     PACKAGE   #{str} "The set of package names to run tests from."]
   (let [worker-pods (pod/pod-pool (update-in (core/get-env) [:dependencies] into pod-deps)
                                   :init init)]
     (core/cleanup (worker-pods :shutdown))
     (core/with-pre-wrap fileset
       (let [worker-pod (worker-pods :refresh)
-            packages (or (seq (map path->package-name paths))
-                         (all-packages (core/input-files fileset)))]
-        (cond
-          (seq classes)
-          (let [result (pod/with-eval-in worker-pod
-                         (run-test-classes '~packages '~classes))]
-            (when (> (:failures result) 0)
-              (throw (ex-info "Some tests failed or errored" {}))))
-
-          (seq packages)
-          (let [result (pod/with-eval-in worker-pod
-                         (run-tests-in-packages '~packages))]
-            (when (> (:failures result) 0)
-              (throw (ex-info "Some tests failed or errored" {}))))
-
-          :else (println "No packages were tested.")))
+            all-class-names (all-class-names (core/input-files fileset))]
+        (if-let [result (pod/with-eval-in worker-pod
+                          (run-tests-in-classes '~all-class-names
+                                                :classes ~class-names
+                                                :packages ~packages))]
+          (when (> (:failures result) 0)
+            (throw (ex-info "Some tests failed or errored" {})))
+          (util/warn "Nothing was tested.")))
       fileset)))
