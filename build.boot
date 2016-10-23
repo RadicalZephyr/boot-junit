@@ -20,5 +20,4 @@
        :url         "https://github.com/radicalzephyr/boot-junit"
        :scm         {:url "https://github.com/radicalzephyr/boot-junit"}
        :license     {"Eclipse Public License"
-                     "http://www.eclipse.org/legal/epl-v10.html"}}
- junit {:packages '#{radicalzephyr.boot_junit.test}})
+                     "http://www.eclipse.org/legal/epl-v10.html"}})
