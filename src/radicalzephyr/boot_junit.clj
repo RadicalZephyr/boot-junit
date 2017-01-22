@@ -32,11 +32,6 @@
                     (str/split #"/")
                     drop-last)))
 
-(defn- all-class-names [user-files]
-  (->> user-files
-       (core/by-ext [".java"])
-       (map path->class-name)))
-
 (core/deftask junit
   "Run the jUnit test runner."
   [c class-names  CLASSNAME #{str} "The set of Java class names to run tests from."
@@ -46,7 +41,11 @@
     (core/cleanup (worker-pods :shutdown))
     (core/with-pre-wrap fileset
       (let [worker-pod (worker-pods :refresh)
-            all-class-names (all-class-names (core/input-files fileset))]
+            java-files (core/by-ext [".java"] (core/input-files fileset))
+            class-files (core/by-ext [".class"] (core/output-files fileset))
+            all-class-names (map path->class-name java-files)]
+        (when-not (seq class-files)
+          (util/warn "No .class files found in `output-files`, did you forget to run `javac`?\n"))
         (if-let [result (pod/with-eval-in worker-pod
                           (run-tests-in-classes '~all-class-names
                                                 :classes ~class-names
