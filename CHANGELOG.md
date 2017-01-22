@@ -9,6 +9,21 @@ of [keepachangelog.com](http://keepachangelog.com/).
 [Unreleased]: https://github.com/RadicalZephyr/boot-junit/compare/0.2.0...HEAD
 
 
+## [0.3.0] - 2017-01-22
+### Added
+
+- Better handling and messages for when the user may have forgotten to
+  run `javac`
+
+### Changed
+
+- Updated version of cljunit to 0.2.0
+- Change `paths` option to `packages` with corresponding change to
+  how they're specified (change '/' to '.')
+
+[0.2.0]: https://github.com/RadicalZephyr/boot-junit/compare/0.2.0...0.3.0
+
+
 ## [0.2.0] - 2015-07-04
 ### Changed
 
