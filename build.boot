@@ -1,13 +1,11 @@
 (set-env!
  :source-paths #{"src"}
  :resource-paths #{"src"}
- :dependencies '[[org.clojure/clojure     "1.6.0" :scope "provided"]
+ :dependencies '[[org.clojure/clojure     "1.8.0" :scope "provided"]
                  [boot/core               "2.1.0" :scope "provided"]
-                 [junit                   "4.12"  :scope "test"]
-                 [radicalzephyr/bootlaces "0.1.15-SNAPSHOT"]])
+                 [junit                   "4.12"  :scope "test"]])
 
-(require '[radicalzephyr.bootlaces :refer :all]
-         '[radicalzephyr.boot-junit :refer [junit]])
+(require '[radicalzephyr.boot-junit :refer [junit]])
 
 (def +version+ "0.3.0-SNAPSHOT")
 
