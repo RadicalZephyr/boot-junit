@@ -46,10 +46,14 @@
             all-class-names (map path->class-name java-files)]
         (when-not (seq class-files)
           (util/warn "No .class files found in `output-files`, did you forget to run `javac`?\n"))
-        (if-let [result (pod/with-eval-in worker-pod
-                          (run-tests-in-classes '~all-class-names
-                                                :classes ~class-names
-                                                :packages ~packages))]
+        (if-let [result (try
+                          (pod/with-eval-in worker-pod
+                           (run-tests-in-classes '~all-class-names
+                                                 :classes ~class-names
+                                                 :packages ~packages))
+                          (catch ClassNotFoundException e
+                            (util/warn "Could not load class: %s...\n" (.getMessage e))
+                            {:failures 1}))]
           (when (> (:failures result) 0)
             (throw (ex-info "Some tests failed or errored" {})))
           (util/warn "Nothing was tested.")))
