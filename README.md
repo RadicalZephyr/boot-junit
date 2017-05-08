@@ -42,7 +42,7 @@ searched for jUnit tests.
 
 ```clojure
 (task-options!
-  junit {:packages '#{radicalzephyr.boot_junit.test}})
+  junit {:packages #{"radicalzephyr.boot_junit.test"}})
 ```
 
 If no packages are specified, the task will automatically try to run
