@@ -6,7 +6,7 @@
             [clojure.string :as str]))
 
 (def pod-deps
-  '[[radicalzephyr/cljunit "0.2.0"]])
+  '[[radicalzephyr/cljunit "0.3.0-SNAPSHOT"]])
 
 (defn- init [fresh-pod]
   (pod/with-eval-in fresh-pod
@@ -35,6 +35,7 @@
 (core/deftask junit
   "Run the jUnit test runner."
   [c class-names  CLASSNAME #{str} "The set of Java class names to run tests from."
+   l listeners    CLASSNAME #{str} "The set of JUnit RunListener classes to add."
    p packages     PACKAGE   #{str} "The set of package names to run tests from."]
   (let [worker-pods (pod/pod-pool (update-in (core/get-env) [:dependencies] into pod-deps)
                                   :init init)]
@@ -50,6 +51,7 @@
                           (pod/with-eval-in worker-pod
                            (run-tests-in-classes '~all-class-names
                                                  :classes ~class-names
+                                                 :listeners ~listeners
                                                  :packages ~packages))
                           (catch ClassNotFoundException e
                             (util/warn "Could not load class: %s...\n" (.getMessage e))
