@@ -9,8 +9,6 @@
 
 (def +version+ "0.4.0")
 
-(bootlaces! +version+)
-
 (task-options!
  pom  {:project     'radicalzephyr/boot-junit
        :version     +version+
