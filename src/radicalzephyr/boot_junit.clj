@@ -6,7 +6,7 @@
             [clojure.string :as str]))
 
 (def pod-deps
-  '[[radicalzephyr/cljunit "0.3.0-SNAPSHOT"]])
+  '[[radicalzephyr/cljunit "0.3.0"]])
 
 (defn- init [fresh-pod]
   (pod/with-eval-in fresh-pod

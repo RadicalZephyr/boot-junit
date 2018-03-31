@@ -13,6 +13,7 @@ of [keepachangelog.com](http://keepachangelog.com/).
 
 ### Changed
 
+- Updated version of cljunit to 0.3.0
 - Improved test failure stacktrace display and filtering
 
 [Unreleased]: https://github.com/RadicalZephyr/boot-junit/compare/0.3.0...HEAD
