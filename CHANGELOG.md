@@ -18,11 +18,20 @@ of [keepachangelog.com](http://keepachangelog.com/).
 ### Changed
 
 - Updated version of cljunit to 0.2.0
-- Change `paths` option to `packages` with corresponding change to
-  how they're specified (change '/' to '.')
+- Change `:paths/--paths` option to `:packages/--packages` with
+  corresponding change to how they're specified (change '/' to '.')
+- Renamed `:classes/--classes` option to `:class-names/--class-names`
+  to emphasize that you need to pass the string class name
 
-[0.2.0]: https://github.com/RadicalZephyr/boot-junit/compare/0.2.0...0.3.0
+[0.3.0]: https://github.com/RadicalZephyr/boot-junit/compare/0.2.1...0.3.0
 
+## [0.2.1] - 2015-07-11
+### Added
+
+- Added an option `:classes/--classes` to specify specific classes to
+  run tests from.
+
+[0.2.1]: https://github.com/RadicalZephyr/boot-junit/compare/0.2.0...0.2.1
 
 ## [0.2.0] - 2015-07-04
 ### Changed
