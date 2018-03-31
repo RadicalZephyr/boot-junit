@@ -5,9 +5,17 @@ of [keepachangelog.com](http://keepachangelog.com/).
 
 
 ## [Unreleased]
+### Added
 
-[Unreleased]: https://github.com/RadicalZephyr/boot-junit/compare/0.2.0...HEAD
+- Added an option `:listeners/--listeners` for passing Java class
+  names to install as `RunListeners`. These classes _must_ implement
+  the jUnit `RunListener` interface
 
+### Changed
+
+- Improved test failure stacktrace display and filtering
+
+[Unreleased]: https://github.com/RadicalZephyr/boot-junit/compare/0.3.0...HEAD
 
 ## [0.3.0] - 2017-01-22
 ### Added
