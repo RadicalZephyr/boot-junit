@@ -8,7 +8,7 @@ of [keepachangelog.com](http://keepachangelog.com/).
 
 [Unreleased]: https://github.com/RadicalZephyr/boot-junit/compare/0.3.0...HEAD
 
-## [0.4.0]
+## [0.4.0] - 2018-03-30
 ### Added
 
 - Added an option `:listeners/--listeners` for passing Java class
