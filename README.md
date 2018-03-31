@@ -2,7 +2,7 @@
 
 [](dependency)
 ```clojure
-[radicalzephyr/boot-junit "0.3.0"] ;; latest release
+[radicalzephyr/boot-junit "0.4.0"] ;; latest release
 ```
 [](/dependency)
 
@@ -27,7 +27,7 @@ If JUnit is not already included as a dependency, you will need to include it. M
 (set-env!
   ...
   :dependencies [junit/junit              "4.12"  :scope "test"]
-                [radicalzephyr/boot-junit "0.2.1" :scope "test"]
+                [radicalzephyr/boot-junit "0.4.0" :scope "test"]
   ...)
 ```
 

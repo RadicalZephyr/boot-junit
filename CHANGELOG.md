@@ -5,6 +5,10 @@ of [keepachangelog.com](http://keepachangelog.com/).
 
 
 ## [Unreleased]
+
+[Unreleased]: https://github.com/RadicalZephyr/boot-junit/compare/0.3.0...HEAD
+
+## [0.4.0]
 ### Added
 
 - Added an option `:listeners/--listeners` for passing Java class
@@ -16,7 +20,7 @@ of [keepachangelog.com](http://keepachangelog.com/).
 - Updated version of cljunit to 0.3.0
 - Improved test failure stacktrace display and filtering
 
-[Unreleased]: https://github.com/RadicalZephyr/boot-junit/compare/0.3.0...HEAD
+[0.4.0]: https://github.com/RadicalZephyr/boot-junit/compare/0.3.0...0.4.0
 
 ## [0.3.0] - 2017-01-22
 ### Added
